@@ -1,0 +1,9 @@
+let x =
+    let y =
+        let z = 10 in z
+    in y
+in
+let x = 10 in
+let y = 15 in
+let z = 20 in
+x
