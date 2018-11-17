@@ -3,9 +3,11 @@ open Result
 open Types
 open Typed
 
-type error =
-| Expected of (Typed.t * (Typed.t * Span.t))
+type cause =
+| Expected of Typed.t * Typed.t
 | Unbound of Var.t
+
+type error = cause * Span.t
 
 module Env = struct
   type t = (Var.t * Typed.t) list
@@ -18,7 +20,7 @@ module Env = struct
   let find env v =
     let eq (v', _) = (fst v = fst v') in
     match List.find ~f:eq env with
-    | None -> Error (Unbound v)
+    | None -> Error (Unbound v, snd v)
     | Some (_, t) -> Ok t
 end
 
@@ -51,11 +53,19 @@ let check_uno (op: Uno.t) : Typed.t =
   | Neg -> Fun (Int, Int)
   | Not -> Fun (Bool, Bool)
 
-let check_exp (env: Env.t) (e: Exp.t) : (Typed.t, error) result =
+let rec check_exp (env: Env.t) (e: Exp.t) : (Typed.t, error) result =
   let open Exp in match fst e with
   | Int _ -> Ok Int
   | True
   | False -> Ok Bool
   | Unit  -> Ok Unit
   | Var v -> Env.find env v
+  | Let (v, e, e') -> check_let env v e e'
   | _ -> failwith "unimplemented"
+
+and check_let _ _ _ =
+  (* match t with *)
+  (* | Some t -> *)
+  (*   check_e *)
+  (* | None -> *)
+  failwith "unimplemented"

@@ -1,10 +1,5 @@
 module Simple = Types
 
-let format_option f fmt o =
-  match o with
-  | None   -> ()
-  | Some e -> f fmt e
-
 module Int = struct
   let format_t fmt e =
     Format.fprintf fmt "%i" (fst e)
@@ -73,10 +68,9 @@ module Exp = struct
     | False -> Format.fprintf fmt "false"
     | Unit  -> Format.fprintf fmt "()"
     | Var v -> Var.format_t fmt v
-    | Let (v, t, e, e') ->
-      Format.fprintf fmt "@[<2>let@ %a%a@ =@ %a@ in@ %a@]"
+    | Let (v, e, e') ->
+      Format.fprintf fmt "@[<2>let@ %a@ =@ %a@ in@ %a@]"
         Var.format_t v    
-        (format_option (fun fmt e -> Format.fprintf fmt "@ :@ %a" Type.format_t e)) t
         format_t e
         format_t e'
     | Abs (v, t, e) ->

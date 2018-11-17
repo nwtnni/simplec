@@ -53,7 +53,7 @@ module Exp = struct
   | False
   | Unit
   | Var of Var.t
-  | Let of Var.t * (Type.t option) * t * t
+  | Let of Var.t * t * t
   | Abs of Var.t * Type.t * t
   | App of t * t
   | If of t * t * t
