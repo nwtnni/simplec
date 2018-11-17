@@ -31,7 +31,7 @@ let driver early target =
   | Dir dir ->
     Sys.chdir dir;
     let go halt file =
-      if file = "." || file = ".." || halt then false else
+      if Sys.is_directory file = `Yes || halt then false else
       try
         let length = String.length file in
         let div = String.make length '-' in
