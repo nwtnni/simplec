@@ -120,3 +120,56 @@ module Exp = struct
         format_t l
         format_t r
 end
+
+module Typed = struct
+  open Typed
+  let rec format_t fmt e =
+    match e with
+    | Int -> Format.fprintf fmt "int"
+    | Unit -> Format.fprintf fmt "unit"
+    | Bool -> Format.fprintf fmt "bool"
+    | Fun (l, r) ->
+      Format.fprintf fmt "%a@ ->@ %a"
+        format_t l
+        format_t r
+    | Prod (l, r) ->
+      Format.fprintf fmt "%a@ *@ %a"
+        format_t l
+        format_t r
+    | Sum (l, r) ->
+      Format.fprintf fmt "%a@ +@ %a"
+        format_t l
+        format_t r
+    
+  let format_result fmt r =
+    let open Check in
+    match r with
+    | Ok t -> format_t fmt t
+    | Error (e, span) -> match e with
+    | Expected (t, t') ->
+      Format.fprintf fmt
+        "%s: expected %a but found %a"
+        (Span.to_string span)
+        format_t t
+        format_t t'
+    | Unbound v ->
+      Format.fprintf fmt
+        "%s: unbound variable %a"
+        (Span.to_string span)
+        Var.format_t v
+    | NotFunction t ->
+      Format.fprintf fmt
+        "%s: expected function but found %a"
+        (Span.to_string span)
+        format_t t
+    | NotProd t ->
+      Format.fprintf fmt
+        "%s: expected product but found %a"
+        (Span.to_string span)
+        format_t t
+    | NotSum t ->
+      Format.fprintf fmt
+        "%s: expected function but found %a"
+        (Span.to_string span)
+        format_t t
+end

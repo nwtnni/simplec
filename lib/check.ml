@@ -7,7 +7,6 @@ type cause =
 | Expected of Typed.t * Typed.t
 | Unbound of Var.t
 | NotFunction of Typed.t
-| NotBool of Typed.t
 | NotProd of Typed.t
 | NotSum of Typed.t
 
@@ -81,7 +80,7 @@ and check_if b t f env =
   match bt with
   | Bool when Typed.equal tt ft -> Ok tt
   | Bool -> Error (Expected (tt, ft), snd f)
-  | _ -> Error (NotBool bt, snd b)
+  | _ -> Error (Expected (Bool, bt), snd b)
 
 and check_bin op l r env =
   let (i, o) = let open Bin in match fst op with 
