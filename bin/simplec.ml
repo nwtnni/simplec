@@ -31,8 +31,14 @@ let driver early target =
   | Dir dir ->
     Sys.chdir dir;
     let go halt file =
-      if file = "." || file = ".." || halt then false
-      else try parse file; false with
+      if file = "." || file = ".." || halt then false else
+      try
+        let length = String.length file in
+        let div = String.make length '-' in
+        Out_channel.printf "\n%s\n%s\n%s\n\n" div file div;
+        parse file;
+        false
+      with
       | ParseError span -> eprintf "%s" span; early
     in
     let _ = Sys.fold_dir ~init:false ~f:go (Sys.getcwd ()) in ()
