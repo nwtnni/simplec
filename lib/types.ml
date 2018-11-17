@@ -8,7 +8,7 @@ module Var = struct
   type t = string span
 end
 
-module rec Type : sig
+module Type = struct
   type pre_t =
   | Int
   | Bool
@@ -18,11 +18,35 @@ module rec Type : sig
   | Sum of t * t
 
   and t = pre_t span
-end = struct
-  include Type
 end
 
-and Exp : sig 
+module Bin = struct
+  type pre_t =
+  | Add
+  | Sub
+  | Mul
+  | Div
+  | LAnd
+  | LOr
+  | Lt
+  | Le
+  | Ge
+  | Gt
+  | Eq
+  | Ne
+
+  type t = pre_t span
+end
+
+module Uno = struct
+  type pre_t =
+  | Neg
+  | Not
+
+  type t = pre_t span
+end
+
+module Exp = struct
   type pre_t =
   | Int of Int.t
   | True
@@ -43,36 +67,4 @@ and Exp : sig
   | Case of t * t * t
 
   and t = pre_t span
-end = struct
-  include Exp
-end
-
-and Bin : sig
-  type pre_t =
-  | Add
-  | Sub
-  | Mul
-  | Div
-  | LAnd
-  | LOr
-  | Lt
-  | Le
-  | Ge
-  | Gt
-  | Eq
-  | Ne
-
-  type t = pre_t span
-end = struct
-  include Bin
-end
-
-and Uno : sig
-  type pre_t =
-  | Neg
-  | Not
-
-  type t = pre_t span
-end = struct
-  include Uno
 end

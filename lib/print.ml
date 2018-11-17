@@ -15,9 +15,56 @@ module Var = struct
     Format.fprintf fmt "%s" (fst e)
 end
 
-module rec Exp : sig
-  val format_t : Format.formatter -> Simple.Exp.t -> unit
-end = struct
+module Bin = struct
+  open Simple.Bin
+  let format_t fmt e =
+    let op = match fst e with
+    | Add  -> "+"
+    | Sub  -> "-"
+    | Mul  -> "*"
+    | Div  -> "/"
+    | LAnd -> "/\\"
+    | LOr  -> "\\/"
+    | Lt   -> "<"
+    | Le   -> "<="
+    | Ge   -> ">="
+    | Gt   -> ">"
+    | Eq   -> "="
+    | Ne   -> "!="
+    in Format.fprintf fmt "%s" op
+end
+
+module Uno = struct
+  open Simple.Uno
+  let format_t fmt e =
+    let op = match fst e with
+    | Neg -> "-"
+    | Not -> "not "
+    in Format.fprintf fmt "%s" op
+end
+
+module Type = struct
+  open Simple.Type
+  let rec format_t fmt e =
+    match fst e with
+    | Int -> Format.fprintf fmt "int"
+    | Unit -> Format.fprintf fmt "unit"
+    | Bool -> Format.fprintf fmt "bool"
+    | Fun (l, r) ->
+      Format.fprintf fmt "%a@ ->@ %a"
+        format_t l
+        format_t r
+    | Prod (l, r) ->
+      Format.fprintf fmt "%a@ *@ %a"
+        format_t l
+        format_t r
+    | Sum (l, r) ->
+      Format.fprintf fmt "%a@ +@ %a"
+        format_t l
+        format_t r
+end
+
+module Exp = struct
   open Simple.Exp
   let rec format_t fmt e =
     match fst e with
@@ -76,61 +123,6 @@ end = struct
     | Case (e, l, r) ->
       Format.fprintf fmt "@[<2>case@ %a@ of@ %a@ |@ %a@]"
         format_t e
-        format_t l
-        format_t r
-end
-
-and Bin : sig
-  val format_t : Format.formatter -> Simple.Bin.t -> unit
-end = struct
-  open Simple.Bin
-  let format_t fmt e =
-    let op = match fst e with
-    | Add  -> "+"
-    | Sub  -> "-"
-    | Mul  -> "*"
-    | Div  -> "/"
-    | LAnd -> "/\\"
-    | LOr  -> "\\/"
-    | Lt   -> "<"
-    | Le   -> "<="
-    | Ge   -> ">="
-    | Gt   -> ">"
-    | Eq   -> "="
-    | Ne   -> "!="
-    in Format.fprintf fmt "%s" op
-end
-
-and Uno : sig
-  val format_t : Format.formatter -> Simple.Uno.t -> unit
-end = struct
-  open Simple.Uno
-  let format_t fmt e =
-    let op = match fst e with
-    | Neg -> "-"
-    | Not -> "not "
-    in Format.fprintf fmt "%s" op
-end
-
-and Type : sig
-  val format_t : Format.formatter -> Simple.Type.t -> unit
-end = struct
-  open Simple.Type
-  let rec format_t fmt e =
-    match fst e with
-    | Int -> Format.fprintf fmt "int"
-    | Unit -> Format.fprintf fmt "unit"
-    | Bool -> Format.fprintf fmt "bool"
-    | Fun (l, r) ->
-      Format.fprintf fmt "%a@ ->@ %a"
-        format_t l
-        format_t r
-    | Prod (l, r) ->
-      Format.fprintf fmt "%a@ *@ %a"
-        format_t l
-        format_t r
-    | Sum (l, r) ->
-      Format.fprintf fmt "%a@ +@ %a"
         format_t l
         format_t r
 end
