@@ -2,17 +2,16 @@ open Simple
 open Core
 
 exception ParseError of Span.t
+exception TypeError of (Check.cause * Span.t)
 
 type mode =
 | Parse
 | Type
-| Eval
 
 let mode = Command.Arg_type.create
   begin function
   | "parse" | "p" -> Parse
   | "type"  | "t" -> Type
-  | "eval"  | "e" -> Eval
   | mode -> (eprintf "Invalid mode %s" mode); exit 1
   end
 
@@ -41,43 +40,58 @@ let print_parsed program = program
   |> Format.print_newline
 
 let check program =
-  Check.check_exp program Check.Env.empty
+  match Check.check_exp program Check.Env.empty with
+  | Ok t -> (t, program)
+  | Error (cause, span) -> raise (TypeError (cause, span))
 
 let print_typed program = program
-  |> Print.Typed.format_result Format.std_formatter
+  |> Print.Typed.format_t Format.std_formatter
   |> Format.print_newline
 
-let process dir early f =
+let eval program =
+  Eval.eval_exp program Eval.Environment.empty
+
+let print_value value = value
+  |> Print.Value.format_t Format.std_formatter
+  |> Format.print_newline
+
+let process dir f =
   Sys.chdir dir;
-  let go halt file =
-    if Sys.is_directory file = `Yes || halt then halt else
+  let f () file =
+    if Sys.is_directory file = `Yes then () else
     try
       let length = String.length file in
       let div = String.make length '-' in
       Out_channel.printf "\n%s\n%s\n%s\n\n" div file div;
       f file;
-      halt
+      ()
     with
-    | ParseError span -> Print.Span.format_t Format.err_formatter span; early
+    | ParseError span ->
+      Print.Span.format_t Format.std_formatter span;
+      Format.print_newline ()
+    | TypeError (cause, span) ->
+      Print.Typed.format_error Format.std_formatter (cause, span);
+      Format.print_newline ()
   in
-  let _ = Sys.fold_dir ~init:false ~f:go (Sys.getcwd ()) in ()
+  let _ = Sys.fold_dir ~init:() ~f (Sys.getcwd ()) in ()
 
-let driver early mode target =
-  match mode, target with
-  | Parse, File file -> parse file |> print_parsed
-  | Type, File file -> parse file |> check |> print_typed
-  | Parse, Dir dir -> process dir early (fun file -> parse file |> print_parsed)
-  | Type, Dir dir -> process dir early (fun file -> parse file |> check |> print_typed)
-  | _ -> failwith "unimplemented"
+let driver mode target =
+  let go = match mode with
+  | Some Parse -> fun file -> file |> parse |> print_parsed
+  | Some Type -> fun file -> file |> parse |> check |> fst |> print_typed
+  | None -> fun file -> file |> parse |> check |> snd |> eval |> print_value
+  in
+  match target with
+  | File file -> go file
+  | Dir dir -> process dir go
 
 let () =
   let open Command.Let_syntax in
   Command.basic
     ~summary:"Compiler front-end for the simply-typed lambda calculus"
     [%map_open
-      let early = flag "early" no_arg ~doc:"halt after first error"
-      and mode = anon ("MODE" %: mode)
+      let mode = flag "mode" (optional mode) ~doc:"Stop at an earlier compilation phase"
       and target = anon ("FILE" %: target) in
-      fun () -> driver early mode target
+      fun () -> driver mode target
     ]
   |> Command.run

@@ -151,11 +151,9 @@ module Typed = struct
         format_t l
         format_t r
     
-  let format_result fmt r =
+  let format_error fmt (cause, span) =
     let open Check in
-    match r with
-    | Ok t -> format_t fmt t
-    | Error (e, span) -> match e with
+    match cause with
     | Expected (t, t') ->
       Format.fprintf fmt
         "%a: expected %a but found %a"
