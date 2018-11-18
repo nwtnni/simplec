@@ -20,6 +20,11 @@ module Var = struct
     Format.fprintf fmt "%s" (fst e)
 end
 
+module String = struct
+  let format_t fmt e =
+    Format.fprintf fmt "%s" (fst e)
+end
+
 module Bin = struct
   open Simple.Bin
   let format_t fmt e =
@@ -54,6 +59,7 @@ module Type = struct
   let rec format_t fmt e =
     match fst e with
     | Int -> Format.fprintf fmt "int"
+    | String -> Format.fprintf fmt "string"
     | Unit -> Format.fprintf fmt "unit"
     | Bool -> Format.fprintf fmt "bool"
     | Fun (l, r) ->
@@ -75,6 +81,7 @@ module Exp = struct
   let rec format_t fmt e =
     match fst e with
     | Int n -> Int.format_t fmt n
+    | String s -> String.format_t fmt s
     | True  -> Format.fprintf fmt "true"
     | False -> Format.fprintf fmt "false"
     | Unit  -> Format.fprintf fmt "()"
@@ -141,6 +148,7 @@ module Typed = struct
   let rec format_t fmt e =
     match e with
     | Int -> Format.fprintf fmt "int"
+    | String -> Format.fprintf fmt "string"
     | Unit -> Format.fprintf fmt "unit"
     | Bool -> Format.fprintf fmt "bool"
     | Fun (l, r) ->
@@ -192,6 +200,7 @@ module Value = struct
   let rec format_t fmt v =
     match v with
     | Int n -> Format.fprintf fmt "%i" n
+    | String s -> Format.fprintf fmt "\"%s\"" s
     | Bool true -> Format.fprintf fmt "true"
     | Bool false -> Format.fprintf fmt "true"
     | Unit -> Format.fprintf fmt "()"

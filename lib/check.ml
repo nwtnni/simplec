@@ -25,6 +25,7 @@ let rec check_type (t: Type.t) : Typed.t =
   | Int -> Int
   | Bool -> Bool
   | Unit -> Unit
+  | String -> String
   | Fun (l, r) -> Fun (check_type l, check_type r)
   | Prod (l, r) -> Prod (check_type l, check_type r)
   | Sum (l, r) -> Sum (check_type l, check_type r)
@@ -32,6 +33,7 @@ let rec check_type (t: Type.t) : Typed.t =
 let rec check_exp (e: Exp.t) (env: Env.t) : (Typed.t, error) result =
   let open Exp in match fst e with
   | Int _ -> Ok Int
+  | String _ -> Ok String
   | True
   | False -> Ok Bool
   | Unit  -> Ok Unit

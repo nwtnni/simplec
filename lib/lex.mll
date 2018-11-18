@@ -1,5 +1,11 @@
 {
+  open Core
   open Parse
+
+  type cause =
+  | UnclosedString
+
+  exception LexError of (cause * Span.t)
 
   let span lexbuf =
     let open Span in
@@ -16,6 +22,7 @@ rule token = parse
 | ws             { token lexbuf }
 | int as n       { INT((int_of_string n, span lexbuf)) }
 | "int"          { INT_TYPE(span lexbuf) }
+| "string"       { STRING_TYPE(span lexbuf) }
 | "bool"         { BOOL_TYPE(span lexbuf) }
 | "unit"         { UNIT_TYPE(span lexbuf) }
 | "->"           { TO(span lexbuf) }
@@ -57,5 +64,15 @@ rule token = parse
 | "let"          { LET(span lexbuf) }
 | "in"           { IN(span lexbuf) }
 | "print"        { PRINT(span lexbuf) }
+| '"'            { str (Buffer.create 10) lexbuf }
 | var as v       { VAR((v, span lexbuf)) }
 | eof            { EOF(span lexbuf) }
+
+and str buf = parse
+| '"'       { STRING(Buffer.contents buf, span lexbuf) }
+| '\\' 't'  { Buffer.add_char buf '\t'; str buf lexbuf }
+| '\\' 'n'  { Buffer.add_char buf '\n'; str buf lexbuf }
+| '\\' '\\' { Buffer.add_char buf '\\'; str buf lexbuf }
+| '\\' '"'  { Buffer.add_char buf '"'; str buf lexbuf }
+| eof       { raise (LexError (UnclosedString, span lexbuf)) }
+| _ as c    { Buffer.add_char buf c; str buf lexbuf }

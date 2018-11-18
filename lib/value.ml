@@ -4,6 +4,7 @@ open Types
 module rec Value : sig 
   type t =
   | Int of int 
+  | String of string
   | Bool of bool
   | Unit
   | Prod of t * t

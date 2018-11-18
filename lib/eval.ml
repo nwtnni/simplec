@@ -21,6 +21,7 @@ let rec eval_exp (e: Exp.t) (env: Environment.t) : Value.t =
   let open Exp in
   match fst e with
   | Int (n, _) -> Int n
+  | String (s, _) -> String s
   | True -> Bool true
   | False -> Bool false
   | Unit -> Unit

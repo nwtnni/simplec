@@ -1,5 +1,6 @@
 type t =
 | Int
+| String
 | Bool
 | Unit
 | Fun of t * t

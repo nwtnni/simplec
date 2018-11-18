@@ -9,6 +9,7 @@
 
 %token <Types.Int.t> INT
 %token <Types.Var.t> VAR
+%token <Types.String.t> STRING
 %token <Span.t> UNIT
 %token <Span.t> TRUE FALSE
 %token <Span.t> LT LE GE GT                           (* int -> int -> bool *)
@@ -16,7 +17,7 @@
 %token <Span.t> ADD SUB MUL DIV                       (* int -> int -> int  *)
 %token <Span.t> LAND LOR NOT                          (* bool -> bool -> bool *)
 %token <Span.t> LAMBDA DOT                            (* Abstraction *)
-%token <Span.t> INT_TYPE BOOL_TYPE UNIT_TYPE TO COLON (* Types *)
+%token <Span.t> INT_TYPE STRING_TYPE BOOL_TYPE UNIT_TYPE TO COLON (* Types *)
 %token <Span.t> LPAREN RPAREN COMMA PIL PIR           (* Products *)
 %token <Span.t> INL INR LBRACE RBRACE CASE OF OR      (* Sums *)
 %token <Span.t> IF THEN ELSE                          (* If statements *)
@@ -98,6 +99,7 @@ exp:
 
 value:
 | INT               { (Exp.Int($1), span $1) }
+| STRING            { (Exp.String($1), span $1) }
 | VAR               { (Exp.Var($1), span $1) }
 | TRUE              { (Exp.True, $1) }
 | FALSE             { (Exp.False, $1) }

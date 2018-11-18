@@ -8,9 +8,14 @@ module Var = struct
   type t = string span
 end
 
+module String = struct
+  type t = string span
+end
+
 module Type = struct
   type pre_t =
   | Int
+  | String
   | Bool
   | Unit
   | Fun of t * t
@@ -50,6 +55,7 @@ end
 module Exp = struct
   type pre_t =
   | Int of Int.t
+  | String of String.t
   | True
   | False
   | Unit
