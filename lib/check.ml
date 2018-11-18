@@ -54,9 +54,10 @@ and check_let v e e' env =
   >>| Env.insert env v
   >>= check_exp e'
 
-and check_abs _ t e env =
+and check_abs v t e env =
   let t = check_type t in
-  check_exp e env >>= fun t' -> Ok (Fun (t, t'))
+  let env' = Env.insert env v t in
+  check_exp e env' >>= fun t' -> Ok (Fun (t, t'))
 
 and check_app e e' env =
   check_exp e env >>= fun t ->
