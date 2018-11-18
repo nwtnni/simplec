@@ -155,12 +155,12 @@ and check_case e l r env =
   check_exp l env >>= fun lt' ->
   check_exp r env >>= fun rt' ->
   match t, lt', rt' with
-  | Prod (lt, rt), Fun (li, lo), Fun (ri, ro)
+  | Sum (lt, rt), Fun (li, lo), Fun (ri, ro)
     when equal lt li && equal rt ri && equal lo ro ->
     Ok lo
-  | Prod (lt, rt), Fun (li, lo), Fun (_, _)
+  | Sum (lt, rt), Fun (li, lo), Fun (_, _)
     when equal lt li ->
     Error (Expected (Fun (rt, lo), rt'), snd r)
-  | Prod (lt, _), Fun (_, _), Fun (_, ro) ->
+  | Sum (lt, _), Fun (_, _), Fun (_, ro) ->
     Error (Expected (Fun (lt, ro), lt'), snd l)
-  | _, _, _ -> Error (NotProd t, snd e)
+  | _, _, _ -> Error (NotSum t, snd e)
