@@ -1,0 +1,1 @@
+(λs : string. length s) "hello, world!"

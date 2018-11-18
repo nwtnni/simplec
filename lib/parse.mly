@@ -70,6 +70,7 @@ exp:
 | IF exp THEN exp ELSE exp     { (Exp.If($2, $4, $6), Span.merge $1 (span $6)) }
 | LPAREN exp COMMA exp RPAREN  { (Exp.Prod($2, $4), Span.merge $1 $5) }
 | LAMBDA VAR COLON typ DOT exp { (Exp.Abs($2, $4, $6), Span.merge $1 (span $6)) }
+| value value                  { (Exp.App($1, $2), Span.merge (span $1) (span $2)) }
 | exp SEMICOLON exp            { (Exp.Seq($1, $3), Span.merge (span $1) (span $3)) }
 | LET VAR EQ exp IN exp        { (Exp.Let($2, $4, $6), Span.merge $1 (span $6)) }
 | CASE exp OF exp OR exp       { (Exp.Case($2, $4, $6), Span.merge $1 (span $6)) }
