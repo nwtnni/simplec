@@ -29,6 +29,7 @@ module Bin = struct
   open Simple.Bin
   let format_t fmt e =
     let op = match fst e with
+    | Cat  -> "^"
     | Add  -> "+"
     | Sub  -> "-"
     | Mul  -> "*"
@@ -51,6 +52,7 @@ module Uno = struct
     | Neg -> "-"
     | Not -> "not "
     | Print -> "print "
+    | Length -> "length "
     in Format.fprintf fmt "%s" op
 end
 

@@ -17,6 +17,10 @@ let unwrap_bool = function
 | Value.Bool b -> b
 | _ -> impossible ()
 
+let unwrap_string = function
+| Value.String s -> s
+| _ -> impossible ()
+
 let rec eval_exp (e: Exp.t) (env: Environment.t) : Value.t =
   let open Exp in
   match fst e with
@@ -69,23 +73,18 @@ and eval_if b t f env =
   | _ -> impossible ()
 
 and eval_bin op l r env =
-  let int_to_int f =
-    let l = eval_exp l env |> unwrap_int in
-    let r = eval_exp r env |> unwrap_int in
-    Value.Int (f l r)
+  let make i o = fun f ->
+    let l = eval_exp l env |> i in
+    let r = eval_exp r env |> i in
+    o (f l r)
   in
-  let bool_to_bool f =
-    let l = eval_exp l env |> unwrap_bool in
-    let r = eval_exp r env |> unwrap_bool in
-    Value.Bool (f l r)
-  in
-  let int_to_bool f =
-    let l = eval_exp l env |> unwrap_int in
-    let r = eval_exp r env |> unwrap_int in
-    Value.Bool (f l r)
-  in
+  let int_to_int = make unwrap_int (fun n -> Value.Int n) in
+  let bool_to_bool = make unwrap_bool (fun b -> Value.Bool b) in
+  let int_to_bool = make unwrap_int (fun b -> Value.Bool b) in
+  let string_to_string = make unwrap_string (fun s -> Value.String s) in
   let open Bin in
   match fst op with
+  | Cat -> string_to_string ( ^ )
   | Add -> int_to_int ( + )
   | Sub -> int_to_int ( - )
   | Mul -> int_to_int ( * )
@@ -109,10 +108,14 @@ and eval_uno op e env =
     let b = eval_exp e env |> unwrap_bool in
     Value.Bool (not b)
   | Print ->
-    let v = eval_exp e env in
-    Print.Value.format_t Format.std_formatter v;
-    Format.print_newline ();
+    begin match eval_exp e env with
+    | String s -> Format.fprintf Format.std_formatter "%s" s
+    | v -> Print.Value.format_t Format.std_formatter v
+    end;
     Value.Unit
+  | Length ->
+    let s = eval_exp e env |> unwrap_string in
+    Value.Int (Core.String.length s)
 
 and eval_prod e e' env =
   Prod (eval_exp e env, eval_exp e' env)

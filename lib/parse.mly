@@ -12,6 +12,7 @@
 %token <Types.String.t> STRING
 %token <Span.t> UNIT
 %token <Span.t> TRUE FALSE
+%token <Span.t> CAT                                   (* string -> string -> string *)
 %token <Span.t> LT LE GE GT                           (* int -> int -> bool *)
 %token <Span.t> EQ NE                                 (* ∀t. t -> t -> bool *)
 %token <Span.t> ADD SUB MUL DIV                       (* int -> int -> int  *)
@@ -23,6 +24,7 @@
 %token <Span.t> IF THEN ELSE                          (* If statements *)
 %token <Span.t> LET IN                                (* Let statements *)
 %token <Span.t> PRINT
+%token <Span.t> LENGTH
 %token <Span.t> SEMICOLON
 %token <Span.t> EOF
 
@@ -33,14 +35,14 @@
 %nonassoc ELSE
 %nonassoc OR
 %left SEMICOLON
-%right PRINT
 
-%right NOT
+%right PRINT
+%right NOT LENGTH
 %left LOR
 %left LAND
 %left EQ NE
 %left LT LE GE GT
-%left ADD SUB
+%left ADD SUB CAT
 %left MUL DIV
 %right PIL PIR
 
@@ -60,6 +62,7 @@ typ:
 prim_typ:
 | INT_TYPE          { (Type.Int, $1) }
 | UNIT_TYPE         { (Type.Unit, $1) }
+| STRING_TYPE       { (Type.String, $1) }
 | BOOL_TYPE         { (Type.Bool, $1) }
 | LPAREN typ RPAREN { (node $2, Span.merge $1 $3) }
 
@@ -80,22 +83,24 @@ exp:
 
 %inline binop:
 | LT   { (Bin.Lt, $1) }
-| LE   { (Bin.Le, $1) } 
-| GE   { (Bin.Ge, $1) } 
-| GT   { (Bin.Gt, $1) } 
-| EQ   { (Bin.Eq, $1) } 
-| NE   { (Bin.Ne, $1) } 
-| ADD  { (Bin.Add, $1) } 
-| SUB  { (Bin.Sub, $1) } 
-| MUL  { (Bin.Mul, $1) } 
-| DIV  { (Bin.Div, $1) } 
-| LAND { (Bin.LAnd, $1) } 
-| LOR  { (Bin.LOr, $1) } 
+| LE   { (Bin.Le, $1) }
+| GE   { (Bin.Ge, $1) }
+| GT   { (Bin.Gt, $1) }
+| EQ   { (Bin.Eq, $1) }
+| NE   { (Bin.Ne, $1) }
+| ADD  { (Bin.Add, $1) }
+| SUB  { (Bin.Sub, $1) }
+| MUL  { (Bin.Mul, $1) }
+| DIV  { (Bin.Div, $1) }
+| LAND { (Bin.LAnd, $1) }
+| LOR  { (Bin.LOr, $1) }
+| CAT  { (Bin.Cat, $1) }
 
-%inline unop:                    
-| SUB   { (Uno.Neg, $1) }
-| NOT   { (Uno.Not, $1) }
-| PRINT { (Uno.Print, $1) }
+%inline unop:
+| SUB    { (Uno.Neg, $1) }
+| NOT    { (Uno.Not, $1) }
+| PRINT  { (Uno.Print, $1) }
+| LENGTH { (Uno.Length, $1) }
 
 value:
 | INT               { (Exp.Int($1), span $1) }

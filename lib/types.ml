@@ -31,6 +31,7 @@ module Bin = struct
   | Sub
   | Mul
   | Div
+  | Cat
   | LAnd
   | LOr
   | Lt
@@ -48,6 +49,7 @@ module Uno = struct
   | Neg
   | Not
   | Print
+  | Length
 
   type t = pre_t span
 end

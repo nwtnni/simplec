@@ -85,6 +85,7 @@ and check_if b t f env =
 
 and check_bin op l r env =
   let (i, o) = let open Bin in match fst op with 
+  | Cat -> (String, String)
   | Add | Sub | Mul | Div -> (Int, Int)
   | LAnd | LOr -> (Bool, Bool)
   | Lt | Le | Ge | Gt | Eq | Ne -> (Int, Bool)
@@ -101,6 +102,8 @@ and check_bin op l r env =
 and check_uno op e env =
   check_exp e env >>= fun t ->
   let open Uno in match fst op with
+  | Length when Typed.equal String t -> Ok Int
+  | Length -> Error (Expected (String, t), snd e)
   | Neg when Typed.equal Int t -> Ok Int
   | Neg -> Error (Expected (Int, t), snd e)
   | Not when Typed.equal Bool t -> Ok Bool

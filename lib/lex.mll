@@ -39,6 +39,7 @@ rule token = parse
 | "-"            { SUB(span lexbuf) }
 | "*"            { MUL(span lexbuf) }
 | "/"            { DIV(span lexbuf) }
+| "^"            { CAT(span lexbuf) }
 | "/\\"          { LAND(span lexbuf) }
 | "\\/"          { LOR(span lexbuf) }
 | "λ" | "lambda" { LAMBDA(span lexbuf) }
@@ -64,6 +65,7 @@ rule token = parse
 | "let"          { LET(span lexbuf) }
 | "in"           { IN(span lexbuf) }
 | "print"        { PRINT(span lexbuf) }
+| "length"       { LENGTH(span lexbuf) }
 | '"'            { str (Buffer.create 10) lexbuf }
 | var as v       { VAR((v, span lexbuf)) }
 | eof            { EOF(span lexbuf) }
