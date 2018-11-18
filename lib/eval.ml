@@ -12,7 +12,7 @@ module rec Value : sig
   | Prod of t * t
   | Left of t 
   | Right of t
-  | Fun of Var.t * Env.t * Exp.t
+  | Fun of Var.t * Environment.t * Exp.t
 end = struct
   include Value
 end
@@ -26,12 +26,12 @@ end = struct
   let unbound _ = impossible ()
 end
 
-and Env : sig 
+and Environment : sig 
   type t = (Var.t * Value.t) list
   val empty: t
   val insert: t -> Var.t -> Value.t -> t
   val find: t -> Var.t -> (Value.t, never_returns * Span.t) result
-end = Simple.Env.Make (Binding)
+end = Env.Make (Binding)
 
 let unwrap = function
 | Ok v -> v
@@ -45,14 +45,14 @@ let unwrap_bool = function
 | Value.Bool b -> b
 | _ -> impossible ()
 
-let rec eval_exp (e: Exp.t) (env: Env.t) : Value.t =
+let rec eval_exp (e: Exp.t) (env: Environment.t) : Value.t =
   let open Exp in
   match fst e with
   | Int (n, _) -> Int n
   | True -> Bool true
   | False -> Bool false
   | Unit -> Unit ()
-  | Var v -> Env.find env v |> unwrap
+  | Var v -> Environment.find env v |> unwrap
   | Let (v, e, e') -> eval_let v e e' env
   | Abs (v, _, e) -> eval_abs v e env
   | App (e, e') -> eval_app e e' env
@@ -67,7 +67,7 @@ let rec eval_exp (e: Exp.t) (env: Env.t) : Value.t =
   | Case (e, l, r) -> eval_case e l r env
 
 and eval_let v e e' env =
-  let env' = Env.insert env v (eval_exp e env) in
+  let env' = Environment.insert env v (eval_exp e env) in
   eval_exp e' env'
 
 and eval_abs v e env =
@@ -76,7 +76,7 @@ and eval_abs v e env =
 and eval_app_value e value env =
   match eval_exp e env with
   | Fun (v, fun_env, fun_e) ->
-    let fun_env' = Env.insert fun_env v value in
+    let fun_env' = Environment.insert fun_env v value in
     eval_exp fun_e fun_env'
   | _ -> impossible ()
 
