@@ -55,5 +55,6 @@ rule token = parse
 | "else"         { ELSE(span lexbuf) }
 | "let"          { LET(span lexbuf) }
 | "in"           { IN(span lexbuf) }
+| "print"        { PRINT(span lexbuf) }
 | var as v       { VAR((v, span lexbuf)) }
 | eof            { EOF(span lexbuf) }

@@ -42,6 +42,7 @@ module Uno = struct
   type pre_t =
   | Neg
   | Not
+  | Print
 
   type t = pre_t span
 end

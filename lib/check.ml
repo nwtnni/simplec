@@ -92,15 +92,13 @@ and check_bin op l r env =
     Error (Expected (i, lt), snd l)
 
 and check_uno op e env =
-  let (i, o) = let open Uno in match fst op with
-  | Neg -> (Int, Int)
-  | Not -> (Bool, Bool)
-  in
   check_exp e env >>= fun t ->
-  if Typed.equal t i then
-    Ok o
-  else
-    Error (Expected (i, t), snd e)
+  let open Uno in match fst op with
+  | Neg when Typed.equal Int t -> Ok Int
+  | Neg -> Error (Expected (Int, t), snd e)
+  | Not when Typed.equal Bool t -> Ok Bool
+  | Not -> Error (Expected (Bool, t), snd e)
+  | Print -> Ok Unit
 
 and check_prod e e' env =
   check_exp e env

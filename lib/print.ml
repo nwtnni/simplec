@@ -45,6 +45,7 @@ module Uno = struct
     let op = match fst e with
     | Neg -> "-"
     | Not -> "not "
+    | Print -> "print "
     in Format.fprintf fmt "%s" op
 end
 
@@ -183,7 +184,7 @@ module Typed = struct
 end
 
 module Value = struct
-  open Eval.Value
+  open Value.Value
   let rec format_t fmt v =
     match v with
     | Int n -> Format.fprintf fmt "%i" n

@@ -1,37 +1,9 @@
 open Core
 open Types
+open Value
 
 let impossible () =
   failwith "[INTERNAL ERROR]: problem with type-checking"
-
-module rec Value : sig 
-  type t =
-  | Int of int 
-  | Bool of bool
-  | Unit
-  | Prod of t * t
-  | Left of Typed.t * t 
-  | Right of Typed.t * t
-  | Fun of Var.t * Environment.t * Exp.t
-end = struct
-  include Value
-end
-
-and Binding : sig
-  type t = Value.t
-  type error = never_returns
-  val unbound: Var.t -> error
-end = struct
-  include Binding
-  let unbound _ = impossible ()
-end
-
-and Environment : sig 
-  type t = (Var.t * Value.t) list
-  val empty: t
-  val insert: t -> Var.t -> Value.t -> t
-  val find: t -> Var.t -> (Value.t, never_returns * Span.t) result
-end = Env.Make (Binding)
 
 let unwrap = function
 | Ok v -> v
@@ -130,6 +102,11 @@ and eval_uno op e env =
   | Not ->
     let b = eval_exp e env |> unwrap_bool in
     Value.Bool (not b)
+  | Print ->
+    let v = eval_exp e env in
+    Print.Value.format_t Format.std_formatter v;
+    Format.print_newline ();
+    Value.Unit
 
 and eval_prod e e' env =
   Prod (eval_exp e env, eval_exp e' env)

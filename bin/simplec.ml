@@ -49,7 +49,7 @@ let print_typed program = program
   |> Format.print_newline
 
 let eval program =
-  Eval.eval_exp program Eval.Environment.empty
+  Eval.eval_exp program Value.Environment.empty
 
 let print_value value = value
   |> Print.Value.format_t Format.std_formatter

@@ -21,6 +21,7 @@
 %token <Span.t> INL INR LBRACE RBRACE CASE OF OR      (* Sums *)
 %token <Span.t> IF THEN ELSE                          (* If statements *)
 %token <Span.t> LET IN                                (* Let statements *)
+%token <Span.t> PRINT
 %token <Span.t> EOF
 
 (* Precedence and associativity *)
@@ -29,6 +30,7 @@
 %nonassoc ELSE
 %nonassoc OR
 %nonassoc DOT
+%nonassoc PRINT
 
 %right NOT
 %left LOR
@@ -87,8 +89,9 @@ exp:
 | LOR  { (Bin.LOr, $1) } 
 
 %inline unop:                    
-| SUB { (Uno.Neg, $1) }
-| NOT { (Uno.Not, $1) }
+| SUB   { (Uno.Neg, $1) }
+| NOT   { (Uno.Not, $1) }
+| PRINT { (Uno.Print, $1) }
 
 value:
 | INT               { (Exp.Int($1), span $1) }
