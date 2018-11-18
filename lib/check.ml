@@ -12,20 +12,13 @@ type cause =
 
 type error = cause * Span.t
 
-module Env = struct
-  type t = (Var.t * Typed.t) list
-
-  let empty = []
-
-  let insert env v t =
-    (v, t) :: env
-
-  let find env v =
-    let eq (v', _) = (fst v = fst v') in
-    match List.find ~f:eq env with
-    | None -> Error (Unbound v, snd v)
-    | Some (_, t) -> Ok t
+module Binding = struct
+  type t = Typed.t
+  type error = cause
+  let unbound v = Unbound v
 end
+
+module Env = Env.Make (Binding)
 
 let rec check_type (t: Type.t) : Typed.t =
   let open Type in match fst t with
