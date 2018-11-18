@@ -1,0 +1,3 @@
+case inr[int + string] "right" of
+  lambda n: int. "left" 
+| lambda s: string. s

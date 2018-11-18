@@ -1,0 +1,7 @@
+let double = λf: int -> int.
+    λx: int. f (f x)
+in
+let inc = λx: int.
+    x + 1
+in
+(double inc) 10

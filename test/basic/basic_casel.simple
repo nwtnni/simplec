@@ -1,0 +1,3 @@
+case inl[int + string] 5 of
+| λx: int. x
+| λs: string. length s
