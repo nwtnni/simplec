@@ -73,6 +73,11 @@ let driver mode target =
   | Some Type -> file |> parse |> check |> fst |> print_typed
   | None -> file |> parse |> check |> snd |> eval |> print_value
   with
+  | Lex.LexError (_, span) ->
+    Format.fprintf Format.std_formatter
+      "%a: unclosed string literal"
+      Print.Span.format_t span;
+    Format.print_newline ();
   | ParseError span ->
     Print.Span.format_t Format.std_formatter span;
     Format.print_newline ()
