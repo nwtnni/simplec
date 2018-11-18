@@ -93,6 +93,10 @@ module Exp = struct
       Format.fprintf fmt "@[<2>%a@ %a@]"
         format_t e
         format_t e'
+    | Seq (e, e') ->
+      Format.fprintf fmt "@[<2>%a;@ %a@]"
+        format_t e
+        format_t e'
     | If (b, t, f) ->
       Format.fprintf fmt "@[<2>if@ %a@ then@ %a@ else@ %a@]"
         format_t b

@@ -38,6 +38,7 @@ rule token = parse
 | "."            { DOT(span lexbuf) }
 | ","            { COMMA(span lexbuf) }
 | ":"            { COLON(span lexbuf) }
+| ";"            { SEMICOLON(span lexbuf) }
 | "not"          { NOT(span lexbuf) }
 | "("            { LPAREN(span lexbuf) }
 | ")"            { RPAREN(span lexbuf) }

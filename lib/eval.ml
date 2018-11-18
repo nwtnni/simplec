@@ -28,6 +28,7 @@ let rec eval_exp (e: Exp.t) (env: Environment.t) : Value.t =
   | Let (v, e, e') -> eval_let v e e' env
   | Abs (v, _, e) -> eval_abs v e env
   | App (e, e') -> eval_app e e' env
+  | Seq (e, e') -> eval_seq e e' env
   | If (b, t, f) -> eval_if b t f env
   | Bin (op, l, r) -> eval_bin op l r env
   | Uno (op, e) -> eval_uno op e env
@@ -55,6 +56,10 @@ and eval_app_value e value env =
 and eval_app e e' env =
   let value = eval_exp e' env in
   eval_app_value e value env
+
+and eval_seq e e' env =
+  let _ = eval_exp e env in
+  eval_exp e' env
 
 and eval_if b t f env =
   match eval_exp b env with

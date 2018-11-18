@@ -39,6 +39,7 @@ let rec check_exp (e: Exp.t) (env: Env.t) : (Typed.t, error) result =
   | Let (v, e, e') -> check_let v e e' env
   | Abs (v, t, e) -> check_abs v t e env
   | App (e, e') -> check_app e e' env
+  | Seq (e, e') -> check_seq e e' env
   | If (b, t, f) -> check_if b t f env
   | Bin (op, l, r) -> check_bin op l r env
   | Uno (op, e) -> check_uno op e env
@@ -66,6 +67,10 @@ and check_app e e' env =
   | Fun (i, o) when Typed.equal t' i -> Ok o
   | Fun (i, _) -> Error (Expected (i, t'), snd e')
   | _ -> Error (NotFunction t, snd e)
+
+and check_seq e e' env =
+  check_exp e env >>= fun _ ->
+  check_exp e' env
 
 and check_if b t f env =
   check_exp b env >>= fun bt ->

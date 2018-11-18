@@ -57,6 +57,7 @@ module Exp = struct
   | Let of Var.t * t * t
   | Abs of Var.t * Type.t * t
   | App of t * t
+  | Seq of t * t
   | If of t * t * t
   | Bin of Bin.t * t * t
   | Uno of Uno.t * t
