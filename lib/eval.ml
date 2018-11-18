@@ -8,10 +8,10 @@ module rec Value : sig
   type t =
   | Int of int 
   | Bool of bool
-  | Unit of unit
+  | Unit
   | Prod of t * t
-  | Left of t 
-  | Right of t
+  | Left of Typed.t * t 
+  | Right of Typed.t * t
   | Fun of Var.t * Environment.t * Exp.t
 end = struct
   include Value
@@ -51,7 +51,7 @@ let rec eval_exp (e: Exp.t) (env: Environment.t) : Value.t =
   | Int (n, _) -> Int n
   | True -> Bool true
   | False -> Bool false
-  | Unit -> Unit ()
+  | Unit -> Unit
   | Var v -> Environment.find env v |> unwrap
   | Let (v, e, e') -> eval_let v e e' env
   | Abs (v, _, e) -> eval_abs v e env
@@ -62,8 +62,8 @@ let rec eval_exp (e: Exp.t) (env: Environment.t) : Value.t =
   | Prod (e, e') -> eval_prod e e' env
   | Pil e -> eval_pil e env
   | Pir e -> eval_pir e env
-  | Inl (_, e) -> eval_inl e env
-  | Inr (_, e) -> eval_inr e env
+  | Inl (t, e) -> eval_inl t e env
+  | Inr (t, e) -> eval_inr t e env
   | Case (e, l, r) -> eval_case e l r env
 
 and eval_let v e e' env =
@@ -144,14 +144,16 @@ and eval_pir e env =
   | Prod (_, r) -> r
   | _ -> impossible ()
 
-and eval_inl e env =
-  Left (eval_exp e env)
+and eval_inl t e env =
+  let t' = Check.check_type t in
+  Left (t', eval_exp e env)
 
-and eval_inr e env =
-  Right (eval_exp e env)
+and eval_inr t e env =
+  let t' = Check.check_type t in
+  Right (t', eval_exp e env)
 
 and eval_case e l r env =
   match eval_exp e env with
-  | Left value -> eval_app_value l value env
-  | Right value -> eval_app_value r value env
+  | Left (_, value) -> eval_app_value l value env
+  | Right (_, value) -> eval_app_value r value env
   | _ -> impossible ()

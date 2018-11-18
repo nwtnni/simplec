@@ -183,3 +183,29 @@ module Typed = struct
         Span.format_t span
         format_t t
 end
+
+module Value = struct
+  open Eval.Value
+  let rec format_t fmt v =
+    match v with
+    | Int n -> Format.fprintf fmt "%i" n
+    | Bool true -> Format.fprintf fmt "true"
+    | Bool false -> Format.fprintf fmt "true"
+    | Unit -> Format.fprintf fmt "()"
+    | Prod (e, e') ->
+      Format.fprintf fmt "(%a, %a)"
+        format_t e
+        format_t e'
+    | Left (t, e) ->
+      Format.fprintf fmt "inl[%a] %a"
+        Typed.format_t t
+        format_t e
+    | Right (t, e) ->
+      Format.fprintf fmt "inr[%a] %a"
+        Typed.format_t t
+        format_t e
+    | Fun (v, _, e) ->
+      Format.fprintf fmt "λ%a. %a"
+        Var.format_t v
+        Exp.format_t e
+end
