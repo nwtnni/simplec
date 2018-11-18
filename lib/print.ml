@@ -5,9 +5,9 @@ module Span = struct
   let format_t fmt s =
     Format.fprintf fmt "%i:%i to %i:%i"
       s.l.pos_lnum
-      s.l.pos_cnum
+      (s.l.pos_cnum - s.l.pos_bol)
       s.r.pos_lnum
-      s.r.pos_cnum
+      (s.r.pos_cnum - s.r.pos_bol)
 end
 
 module Int = struct
@@ -65,15 +65,15 @@ module Type = struct
     | Unit -> Format.fprintf fmt "unit"
     | Bool -> Format.fprintf fmt "bool"
     | Fun (l, r) ->
-      Format.fprintf fmt "%a@ ->@ %a"
+      Format.fprintf fmt "@[%a ->@ %a@]"
         format_t l
         format_t r
     | Prod (l, r) ->
-      Format.fprintf fmt "%a@ *@ %a"
+      Format.fprintf fmt "@[%a *@ %a@]"
         format_t l
         format_t r
     | Sum (l, r) ->
-      Format.fprintf fmt "%a@ +@ %a"
+      Format.fprintf fmt "@[%a +@ %a@]"
         format_t l
         format_t r
 end
@@ -89,12 +89,12 @@ module Exp = struct
     | Unit  -> Format.fprintf fmt "()"
     | Var v -> Var.format_t fmt v
     | Let (v, e, e') ->
-      Format.fprintf fmt "@[<2>let@ %a@ =@ %a@ in@ %a@]"
+      Format.fprintf fmt "@[<2>let %a =@ %a@ in %a@]"
         Var.format_t v    
         format_t e
         format_t e'
     | Abs (v, t, e) ->
-      Format.fprintf fmt "@[<2>λ%a@ :@ %a.@ %a@]"
+      Format.fprintf fmt "@[<2>λ%a: %a.@ %a@]"
         Var.format_t v
         Type.format_t t 
         format_t e
@@ -107,12 +107,12 @@ module Exp = struct
         format_t e
         format_t e'
     | If (b, t, f) ->
-      Format.fprintf fmt "@[<2>if@ %a@ then@ %a@ else@ %a@]"
+      Format.fprintf fmt "@[<2>if %a then@ %a@ else@ %a@]"
         format_t b
         format_t t
         format_t f
     | Bin (op, l, r) ->
-      Format.fprintf fmt "@[<2>%a@ %a@ %a@]"
+      Format.fprintf fmt "@[<2>%a %a@ %a@]"
         format_t l
         Bin.format_t op
         format_t r
@@ -131,15 +131,15 @@ module Exp = struct
       Format.fprintf fmt "%a.1"
         format_t e
     | Inl (t, e) ->
-      Format.fprintf fmt "@[<2>inl[%a]@ %a@]"
+      Format.fprintf fmt "@[<2>inl[%a] %a@]"
         Type.format_t t
         format_t e
     | Inr (t, e) ->
-      Format.fprintf fmt "@[<2>inr[%a]@ %a@]"
+      Format.fprintf fmt "@[<2>inr[%a] %a@]"
         Type.format_t t
         format_t e
     | Case (e, l, r) ->
-      Format.fprintf fmt "@[<2>case@ %a@ of@ %a@ |@ %a@]"
+      Format.fprintf fmt "@[<2>case %a of@ %a@ | %a@]"
         format_t e
         format_t l
         format_t r
@@ -154,15 +154,15 @@ module Typed = struct
     | Unit -> Format.fprintf fmt "unit"
     | Bool -> Format.fprintf fmt "bool"
     | Fun (l, r) ->
-      Format.fprintf fmt "%a@ ->@ %a"
+      Format.fprintf fmt "@[%a ->@ %a@]"
         format_t l
         format_t r
     | Prod (l, r) ->
-      Format.fprintf fmt "%a@ *@ %a"
+      Format.fprintf fmt "@[%a *@ %a@]"
         format_t l
         format_t r
     | Sum (l, r) ->
-      Format.fprintf fmt "%a@ +@ %a"
+      Format.fprintf fmt "@[%a +@ %a@]"
         format_t l
         format_t r
     
@@ -207,7 +207,7 @@ module Value = struct
     | Bool false -> Format.fprintf fmt "true"
     | Unit -> Format.fprintf fmt "()"
     | Prod (e, e') ->
-      Format.fprintf fmt "(%a, %a)"
+      Format.fprintf fmt "@[(%a,@ %a)@]"
         format_t e
         format_t e'
     | Left (t, e) ->
@@ -219,7 +219,7 @@ module Value = struct
         Typed.format_t t
         format_t e
     | Fun (v, _, e) ->
-      Format.fprintf fmt "λ%a. %a"
+      Format.fprintf fmt "@[λ%a.@ %a@]"
         Var.format_t v
         Exp.format_t e
 end

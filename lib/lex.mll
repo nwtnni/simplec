@@ -7,6 +7,8 @@
 
   exception LexError of (cause * Span.t)
 
+  let start = ref Lexing.dummy_pos
+
   let span lexbuf =
     let open Span in
     { l = Lexing.lexeme_start_p lexbuf;
@@ -66,15 +68,19 @@ rule token = parse
 | "in"           { IN(span lexbuf) }
 | "print"        { PRINT(span lexbuf) }
 | "length"       { LENGTH(span lexbuf) }
-| '"'            { str (Buffer.create 10) lexbuf }
+| '"'            { start := Lexing.lexeme_start_p lexbuf;
+                   str (Buffer.create 10) lexbuf }
 | var as v       { VAR((v, span lexbuf)) }
 | eof            { EOF(span lexbuf) }
 
 and str buf = parse
-| '"'       { STRING(Buffer.contents buf, span lexbuf) }
 | '\\' 't'  { Buffer.add_char buf '\t'; str buf lexbuf }
 | '\\' 'n'  { Buffer.add_char buf '\n'; str buf lexbuf }
 | '\\' '\\' { Buffer.add_char buf '\\'; str buf lexbuf }
 | '\\' '"'  { Buffer.add_char buf '"'; str buf lexbuf }
 | eof       { raise (LexError (UnclosedString, span lexbuf)) }
+| '"'       { let open Span in
+              let l = !start in
+              let r = Lexing.lexeme_end_p lexbuf in
+              STRING(Buffer.contents buf, { l; r }) }
 | _ as c    { Buffer.add_char buf c; str buf lexbuf }
