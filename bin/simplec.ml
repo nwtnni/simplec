@@ -1,7 +1,7 @@
 open Simple
 open Core
 
-exception ParseError of string
+exception ParseError of Span.t
 
 type mode =
 | Parse
@@ -34,7 +34,7 @@ let parse file =
   in try lexbuf
   |> Parse.program Lex.token
   with
-  | Parse.Error -> raise (ParseError (Span.to_string (Lex.span lexbuf)))
+  | Parse.Error -> raise (ParseError (Lex.span lexbuf))
 
 let print_parsed program = program
   |> Print.Exp.format_t Format.std_formatter
@@ -58,7 +58,7 @@ let process dir early f =
       f file;
       halt
     with
-    | ParseError span -> eprintf "%s\n\n" span; early
+    | ParseError span -> Print.Span.format_t Format.err_formatter span; early
   in
   let _ = Sys.fold_dir ~init:false ~f:go (Sys.getcwd ()) in ()
 

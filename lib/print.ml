@@ -1,5 +1,15 @@
 module Simple = Types
 
+module Span = struct
+  open Span
+  let format_t fmt s =
+    Format.fprintf fmt "%i:%i to %i:%i"
+      s.l.pos_lnum
+      s.l.pos_cnum
+      s.r.pos_lnum
+      s.r.pos_cnum
+end
+
 module Int = struct
   let format_t fmt e =
     Format.fprintf fmt "%i" (fst e)
@@ -148,28 +158,28 @@ module Typed = struct
     | Error (e, span) -> match e with
     | Expected (t, t') ->
       Format.fprintf fmt
-        "%s: expected %a but found %a"
-        (Span.to_string span)
+        "%a: expected %a but found %a"
+        Span.format_t span
         format_t t
         format_t t'
     | Unbound v ->
       Format.fprintf fmt
-        "%s: unbound variable %a"
-        (Span.to_string span)
+        "%a: unbound variable %a"
+        Span.format_t span
         Var.format_t v
     | NotFunction t ->
       Format.fprintf fmt
-        "%s: expected function but found %a"
-        (Span.to_string span)
+        "%a: expected function but found %a"
+        Span.format_t span
         format_t t
     | NotProd t ->
       Format.fprintf fmt
-        "%s: expected product but found %a"
-        (Span.to_string span)
+        "%a: expected product but found %a"
+        Span.format_t span
         format_t t
     | NotSum t ->
       Format.fprintf fmt
-        "%s: expected function but found %a"
-        (Span.to_string span)
+        "%a: expected function but found %a"
+        Span.format_t span
         format_t t
 end
